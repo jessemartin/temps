@@ -5,6 +5,8 @@
 #include <vector>
 #include <regex>
 #include <string>
+#include <chrono>
+#include <thread>
 
 using namespace std;
 
@@ -14,6 +16,7 @@ vector<double> drive;
 
 void render(vector<double> cpu, vector<double> gpu, vector<double> drive)
 {
+  cout << "\033[A\033[2K\033[A\033[2K\033[A\033[2K\033[A\033[2K\033[A\033[2K\033[A\033[2K\033[A\033[2K\033[A\033[2K\033[A\033[2K\033[A\033[2K\033[A\033[2K";
   cout << "   CPU   | GPU | Drive\n";
   for (int i = 10; i > 0; i--)
   {
@@ -92,10 +95,12 @@ void update_cpu_temp() {
 
 int main()
 {
-  update_cpu_temp();
-
-  gpu = {29.0};
-  drive = {26.2};
-  render(cpu, gpu, drive);
+  while(true) {
+    update_cpu_temp();
+    gpu = {29.0};
+    drive = {26.2};
+    render(cpu, gpu, drive);
+    this_thread::sleep_for(chrono::seconds(1));
+  }
   return 0;
 }
