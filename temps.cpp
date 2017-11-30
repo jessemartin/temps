@@ -18,7 +18,7 @@ vector<double> drive;
 
 int col_width = 5;
 
-void render(vector<double> cpu, vector<double> gpu, vector<double> drive)
+void render(vector<double> &cpu, vector<double> &gpu, vector<double> &drive, int &height)
 {
   ostringstream rendered;
 
@@ -88,7 +88,7 @@ vector<string> split(const string &s, char delim) {
   return tokens;
 }
 
-vector<double> parse_cpu_temp(string cpu_temp) {
+vector<double> parse_cpu_temp(string &cpu_temp) {
   vector<string> lines = split(cpu_temp.c_str(), '\n');
   vector<double> temps;
   regex core_temp ("Core[^+|-]*([^°]*).*");
@@ -112,15 +112,22 @@ void update_cpu_temp() {
   cpu = get_cpu_temp();
 }
 
+void clear_screen(int &height) {
+  for (int i = 0; i < height; i++) {
+    cout << "\033[A\033[2K";
+  }
+}
+
 int main()
 {
+  int height = 12;
   while(true) {
     update_cpu_temp();
     gpu = {29.0};
     drive = {26.2};
-    render(cpu, gpu, drive);
+    render(cpu, gpu, drive, height);
     this_thread::sleep_for(chrono::seconds(1));
-    cout << "\033[A\033[2K\033[A\033[2K\033[A\033[2K\033[A\033[2K\033[A\033[2K\033[A\033[2K\033[A\033[2K\033[A\033[2K\033[A\033[2K\033[A\033[2K\033[A\033[2K\033[A\033[2K";
+    clear_screen(height);
   }
   return 0;
 }
