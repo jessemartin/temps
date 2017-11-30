@@ -9,30 +9,34 @@
 #include <iomanip>
 #include <math.h>
 #include "center.cpp"
+#include "cpu.cpp"
 
 using namespace std;
 
-vector<double> cpu;
 vector<double> gpu;
 vector<double> drive;
 
 int col_width = 5;
 
-void render(const vector<double> &cpu, const vector<double> &gpu, const vector<double> &drive, const int &height)
+void render(CPU cpu, const vector<double> &gpu, const vector<double> &drive, const int &height)
 {
   ostringstream rendered;
+  int title_height = 1;
+  int footer_height = 1;
+  int graph_height = height - title_height - footer_height;
 
   string cpu_header = "CPU Temps";
   int section_padding_right = 1;
-  int section_width = col_width * cpu.size() + section_padding_right;
+  vector<double> cpu_temps = cpu.getTemps();
+  int section_width = col_width * cpu_temps.size() + section_padding_right;
 
   rendered << "|" << setw(section_width) << centered(cpu_header) << "|\n";
-  for (int i = 10; i > 0; i--)
+  for (int i = graph_height; i > 0; i--)
   {
     rendered << "| ";
-    for (int j = 0; j < cpu.size(); j++)
+    for (int j = 0; j < cpu_temps.size(); j++)
     {
-      if (cpu[j] >= i * 10)
+      if (cpu_temps[j] >= i * 10)
       {
         rendered << setw(col_width) << centered("==");
       }
@@ -45,9 +49,9 @@ void render(const vector<double> &cpu, const vector<double> &gpu, const vector<d
   }
 
   rendered << "| ";
-  for (int i = 0; i < cpu.size(); i++) {
+  for (int i = 0; i < cpu_temps.size(); i++) {
     ostringstream temp;
-    temp << cpu.at(i);
+    temp << cpu_temps.at(i);
     rendered << setw(col_width) << centered(temp.str());
   }
   rendered << "|\n";
@@ -55,64 +59,23 @@ void render(const vector<double> &cpu, const vector<double> &gpu, const vector<d
   cout << rendered.str();
 }
 
-string probe_cpu() {
-  char buffer[128];
-  string result = "";
-  FILE *pipe = popen("sensors", "r");
-  if (!pipe)
-    printf("popen() failed!");
-  try
-  {
-    while (!feof(pipe))
-    {
-      if (fgets(buffer, 128, pipe) != NULL)
-        result += buffer;
-    }
-  }
-  catch (...)
-  {
-    pclose(pipe);
-    throw;
-  }
-  pclose(pipe);
-  return result;
+string probeGpu() {
+  return execCommand("nvidia-smi --id=0 --query-gpu=temperature.gpu --format=csv");
 }
 
-vector<string> split(const string &s, char delim) {
-  stringstream ss(s);
-  string item;
-  vector<string> tokens;
-  while (getline(ss, item, delim)) {
-    tokens.push_back(item);
-  }
-  return tokens;
+vector<double> parseGpuTemp(const string &gpu_temp) {
 }
 
-vector<double> parse_cpu_temp(const string &cpu_temp) {
-  vector<string> lines = split(cpu_temp.c_str(), '\n');
-  vector<double> temps;
-  regex core_temp ("Core[^+|-]*([^°]*).*");
-  smatch matches;
-  for (int i = 0; i < lines.size(); i++) {
-    regex_match(lines[i], matches, core_temp);
-    if (matches.size() == 2) {
-      double temp = stod(matches.str(1));
-      temps.push_back(temp);
-    }
-  }
-  return temps;
+vector<double> getGpuTemp() {
+  string gpu_temp = probeGpu();
+  return parseGpuTemp(gpu_temp);
 }
 
-vector<double> get_cpu_temp() {
-  string cpu_temp = probe_cpu();
-  return parse_cpu_temp(cpu_temp);
+void updateGpuTemp() {
+  gpu = getGpuTemp();
 }
 
-void update_cpu_temp() {
-  cpu = get_cpu_temp();
-}
-
-void clear_screen(const int &height) {
+void clearScreen(const int &height) {
   for (int i = 0; i < height; i++) {
     cout << "\033[A\033[2K";
   }
@@ -121,13 +84,17 @@ void clear_screen(const int &height) {
 int main()
 {
   int height = 12;
+
+  CPU cpu {};
+  // GPU gpu {};
   while(true) {
-    update_cpu_temp();
-    gpu = {29.0};
+    cpu.update();
+    // gpu.update();
+    updateGpuTemp();
     drive = {26.2};
     render(cpu, gpu, drive, height);
     this_thread::sleep_for(chrono::seconds(1));
-    clear_screen(height);
+    clearScreen(height);
   }
   return 0;
 }
