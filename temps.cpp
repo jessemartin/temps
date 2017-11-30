@@ -10,15 +10,13 @@
 #include <math.h>
 #include "center.cpp"
 #include "cpu.cpp"
+#include "gpu.cpp"
 
 using namespace std;
 
-vector<double> gpu;
-vector<double> drive;
-
 int col_width = 5;
 
-void render(CPU cpu, const vector<double> &gpu, const vector<double> &drive, const int &height)
+void render(CPU cpu, GPU gpu, const int &height)
 {
   ostringstream rendered;
   int title_height = 1;
@@ -59,22 +57,6 @@ void render(CPU cpu, const vector<double> &gpu, const vector<double> &drive, con
   cout << rendered.str();
 }
 
-string probeGpu() {
-  return execCommand("nvidia-smi --id=0 --query-gpu=temperature.gpu --format=csv");
-}
-
-vector<double> parseGpuTemp(const string &gpu_temp) {
-}
-
-vector<double> getGpuTemp() {
-  string gpu_temp = probeGpu();
-  return parseGpuTemp(gpu_temp);
-}
-
-void updateGpuTemp() {
-  gpu = getGpuTemp();
-}
-
 void clearScreen(const int &height) {
   for (int i = 0; i < height; i++) {
     cout << "\033[A\033[2K";
@@ -86,13 +68,11 @@ int main()
   int height = 12;
 
   CPU cpu {};
-  // GPU gpu {};
+  GPU gpu {};
   while(true) {
     cpu.update();
-    // gpu.update();
-    updateGpuTemp();
-    drive = {26.2};
-    render(cpu, gpu, drive, height);
+    gpu.update();
+    render(cpu, gpu, height);
     this_thread::sleep_for(chrono::seconds(1));
     clearScreen(height);
   }

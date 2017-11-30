@@ -33,8 +33,6 @@ vector<double> parseCpuTemp(const string &cpu_temp) {
 }
 
 vector<double> getCpuTemp() {
-  string cpu_temp = probeCpu();
-  return parseCpuTemp(cpu_temp);
 }
 
 class CPU
@@ -49,7 +47,7 @@ public:
 
   void update()
   {
-    temps = getCpuTemp();
+    temps = parseCpuTemp(probeCpu());
   }
 
   vector<double> getTemps() {
