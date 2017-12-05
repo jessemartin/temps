@@ -8,6 +8,7 @@
 #include <thread>
 #include <iomanip>
 #include <math.h>
+#include <map>
 #include "center.cpp"
 #include "cpu.cpp"
 #include "gpu.cpp"
@@ -15,6 +16,31 @@
 using namespace std;
 
 int col_width = 5;
+
+bool supportsColors() {
+  return true;
+}
+
+map<int,int> colorTemps = {
+  { 1, 34 },//blue         34         44
+  { 2, 36 },//cyan         36         46
+  { 3, 32 },//green        32         42
+  { 4, 33 },//yellow       33         43
+  { 5, 31 },//red          31         41
+  { 6, 35 },//magenta      35         45
+  { 7, 37 },//white        37         47
+  { 8, 37 },//white        37         47
+  { 9, 37 },//white        37         47
+  { 10, 37 }//white        37         47
+};
+
+void printColoredTempBar(const int &width, const int &step, ostringstream &rendered) {
+  int color = colorTemps[step];
+  string colorString = "\033[1;" + to_string(color) + "m";
+  rendered << colorString << setw(width);
+  rendered << centered("==");
+  rendered << "\033[0m";
+};
 
 void render(CPU cpu, GPU gpu, const int &height)
 {
@@ -47,7 +73,7 @@ void render(CPU cpu, GPU gpu, const int &height)
     {
       if (cpu_temps[j] >= i * 10)
       {
-        rendered << setw(col_width) << centered("==");
+        printColoredTempBar(col_width, i, rendered);
       }
       else
       {
@@ -60,7 +86,7 @@ void render(CPU cpu, GPU gpu, const int &height)
     {
       if (gpu_temps[j] >= i * 10)
       {
-        rendered << setw(col_width + 1) << centered("==");
+        printColoredTempBar(col_width + 1, i, rendered);
       }
       else
       {
