@@ -1,4 +1,8 @@
 #include <stdio.h>
+#include <vector>
+#include <string>
+#include "command.cpp"
+#include "cpu.cpp"
 
 using namespace std;
 
@@ -25,7 +29,7 @@ class GPU
 {
 private:
   vector<double> temps;
- 
+
 public:
   GPU()
   {

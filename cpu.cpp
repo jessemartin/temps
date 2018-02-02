@@ -1,4 +1,8 @@
 #include <stdio.h>
+#include <string>
+#include <vector>
+#include <regex>
+#include <sstream>
 #include "command.cpp"
 
 using namespace std;
@@ -39,7 +43,7 @@ class CPU
 {
 private:
   vector<double> temps;
- 
+
 public:
   CPU()
   {
