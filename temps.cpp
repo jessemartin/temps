@@ -60,14 +60,20 @@ void render(CPU cpu, GPU gpu, const int &height)
   int gpu_section_width = col_width * gpu_temps.size() + section_padding_right;
 
   // Header
-  rendered << "|" << setw(cpu_section_width) << centered(cpu_header);
-  rendered << "|" << setw(gpu_section_width) << centered(gpu_header);
+  if (cpu_temps.size()) {
+    rendered << "|" << setw(cpu_section_width) << centered(cpu_header);
+  }
+  if (gpu_temps.size()) {
+    rendered << "|" << setw(gpu_section_width) << centered(gpu_header);
+  }
   rendered << "|\n";
 
   // Bar graphs
   for (int i = graph_height; i > 0; i--)
   {
-    rendered << "| ";
+    if (cpu_temps.size()) {
+      rendered << "| ";
+    }
     // CPU temp
     for (int j = 0; j < cpu_temps.size(); j++)
     {
@@ -80,7 +86,9 @@ void render(CPU cpu, GPU gpu, const int &height)
         rendered << setw(col_width) << centered("..");
       }
     }
-    rendered << "|";
+    if (gpu_temps.size()) {
+      rendered << "|";
+    }
     // GPU temp
     for (int j = 0; j < gpu_temps.size(); j++)
     {
@@ -97,14 +105,18 @@ void render(CPU cpu, GPU gpu, const int &height)
   }
 
   // Footer
-  rendered << "| ";
+  if (cpu_temps.size()) {
+    rendered << "| ";
+  }
   // CPU temp
   for (int i = 0; i < cpu_temps.size(); i++) {
     ostringstream temp;
     temp << cpu_temps.at(i);
     rendered << setw(col_width) << centered(temp.str());
   }
-  rendered << "|";
+  if (gpu_temps.size()) {
+    rendered << "|";
+  }
   // GPU temp
   for (int i = 0; i < gpu_temps.size(); i++) {
     ostringstream temp;
